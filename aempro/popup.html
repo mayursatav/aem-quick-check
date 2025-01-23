@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AEM Tools</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      width: 400px; /* Width of the popup */
+      font-size: 13px;
+    }
+    /* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cc3f3d rgb(255, 255, 255);
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgb(255, 255, 255);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #cc3f3d;
+  border-radius: 5px;
+  border: 1px solid rgb(255, 255, 255);
+}
+
+    .tabs {
+      display: flex;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #e9ecef;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px 0;
+      text-align: center;
+      cursor: pointer;
+      color: #6c757d;
+      font-weight: 500;
+      position: relative;
+    }
+    .tab.active {
+      color: #343a40;
+      font-weight: bold;
+    }
+    .tab.active::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: #343a40;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .highlight-external {
+      background-color: yellow !important;
+    }
+    .component-label {
+      position: absolute;
+      background: black;
+      color: white;
+      padding: 2px 5px;
+      font-size: 10px;
+    }
+
+    /* Styling for the meta properties table */
+    .meta-properties-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-family: Arial, sans-serif;
+    }
+
+    .meta-properties-table th,
+    .meta-properties-table td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+
+    .meta-properties-table th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+
+    .meta-properties-table td.missing {
+      background-color: #f8d7da;
+      color: #721c24;
+      font-weight: bold;
+    }
+
+    .meta-properties-table td {
+      background-color: #ffffff;
+      color: #333;
+    }
+
+    .meta-properties-table tr:hover {
+      background-color: #f1f1f1;
+    }
+    .fixed-footer {
+      margin-bottom: -10px;
+      padding-bottom: 10px;
+      padding-top: 10px;
+      background-color: white;
+      position: fixed;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+    .fixed-footer a {
+      color: #dc3545;
+      text-decoration: none;
+    }
+
+    .fixed-footer a:hover {
+      text-decoration: underline;
+    }
+    /* Overlay message styling */
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      margin-top: 13%;
+      width: 100%;
+      height: 65%;
+      background-color: rgba(0, 0, 0, 0.735);
+      color: white;
+      font-size: 18px;
+      text-align: center;
+      padding-top: 20%;
+      z-index: 1000;
+    }
+    
+    /* Style to indicate disabled tab */
+    .disabled-tab {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    .hide{
+      display: none;
+    }
+    .inputBoxDomain {
+      height: 31px;
+    }
+    li {
+  list-style-type: none;
+}
+.overflow {
+  overflow: hidden;
+  -ms-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overflow:hover {
+  overflow: visible;
+}
+
+.overflow:hover span {
+  position: relative;
+  background-color: white;
+
+  box-shadow: 0 0 4px 0 black;
+  border-radius: 1px;
+}
+.scroll {
+    max-height: 100px;
+    overflow-y: auto;
+}
+  </style>
+</head>
+<body>
+  <div class="container mt-3" style="padding-bottom: 40px;">
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" data-target="#tab1">Page Config</div>
+      <div class="tab" data-target="#tab3">Web Check</div>
+      <div class="tab" data-target="#tab2">SEO Check</div>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="tab-content active" id="tab1">
+      <div class="mb-3">
+        <div class="d-flex">
+          <input type="text" class="form-control me-2 inputBoxDomain" id="domainInput" placeholder="Author Domain">
+          <button id="addDomain" class="btn btn-dark btn-sm">Add</button>
+        </div>
+      </div>
+      <div class="mb-3">
+        <select class="form-select input-sm" id="domainDropdown">
+          <option value="" selected disabled>Select a domain</option>
+        </select>
+      </div>
+      
+      <button id="openPageProperties" class="btn btn-dark btn-sm mb-2">Edit Page Properties</button>  
+      <button id="openEditorMode" class="btn btn-dark btn-sm mb-2">Edit Page</button>
+      <button id="editTemplate" class="btn btn-dark btn-sm mb-2" disabled>Edit Template</button>
+      <!-- <button id="showComponents" class="btn btn-dark btn-sm mb-2">Components</button>
+      <button id="showExternalLinks" class="btn btn-dark btn-sm mb-2">External Links</button>
+      <button id="showMissingAltText" class="btn btn-dark btn-sm mb-2">Missing Alt Text</button>
+      <button id="showImagePath" class="btn btn-dark btn-sm mb-2">Image Path</button>
+      <button id="showImageResolution" class="btn btn-dark btn-sm mb-2">Image Resolution</button> -->
+      <div id="overlay">Not an AEM Site</div>
+      <div id="details-container">
+        <div class="details" id="createdBy"></div>
+        <div class="details" id="created"></div>
+        <div class="details" id="template"></div>
+        <div class="details" id="lastRolledOut"></div>
+        <div class="details" id="lastModified"></div>
+        <div class="details" id="lastModifiedBy"></div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab2">
+      <div id="pageProperties" class="mt-2">
+        <!-- Page properties will be displayed here -->
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab3">
+      <div class="mb-1">
+        <button id="showComponents" class="btn btn-dark btn-sm mb-2">Components</button>
+        <button id="showExternalLinks" class="btn btn-dark btn-sm mb-2">External Links</button>
+        <button id="showMissingAltText" class="btn btn-dark btn-sm mb-2">Missing Alt Text</button>
+        <button id="showImagePath" class="btn btn-dark btn-sm mb-2">Image Path</button>
+        <button id="showImageResolution" class="btn btn-dark btn-sm mb-2">Image Resolution</button>
+      </div>
+      <!-- Radio buttons to select color format -->
+      <div id="pageStyles" >
+        <div class="card mb-2">
+          <div  class="card-body scroll">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <h6 class="mb-2">Brand Colors</h6>
+                </div>
+                <div class="col-auto ms-auto">
+                  <label class="me-2">
+                    <input type="radio" name="colorFormat" value="rgb" checked> RGB
+                  </label>
+                  <label>
+                    <input type="radio" name="colorFormat" value="hex"> Hex
+                  </label>
+                </div>
+              </div>
+
+            <div id="colorList"></div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div id="fontList" class="card-body scroll">
+            <h6>Brand Fonts</h6>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed Footer -->
+  <div class="fixed-footer">
+    Created by Mayur Satav | <a href="https://github.com/MayurSatav" target="_blank">Dont forget to give star Give a Star ⭐️</a>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
