@@ -17,8 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Disable the buttons initially
   openPageProperties.disabled = true;
   openEditorMode.disabled = true;
-  const tab1 = document.querySelector("#tab1");
-  const overlay = document.getElementById("overlay");
+  editTemplateButton.disabled = true;
 
 // Query the active tab and execute a script to check the conditions
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -91,6 +90,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       // Enable buttons if a valid domain is selected
       openPageProperties.disabled = !selectedDomain;
       openEditorMode.disabled = !selectedDomain;
+      editTemplateButton.disabled = !selectedDomain;
     });
   });
 
@@ -112,6 +112,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       domainDropdown.value = selectedDomain;
       openPageProperties.disabled = false;
       openEditorMode.disabled = false;
+      editTemplateButton.disabled = false;
     }
   });
 
@@ -127,14 +128,14 @@ addDomainButton.addEventListener("click", () => {
       const domains = result.aemDomains || [];
 
       // Normalize the domain by removing http:// or https:// before adding it
-      const normalizedDomain = domain.replace(/^(https?:\/\/)/, '');
+      // const normalizedDomain = domain.replace(/^(https?:\/\/)/, '');
 
       // Add the domain if it's not already in the list
-      if (!domains.includes(normalizedDomain)) {
-        domains.push(normalizedDomain);
+      if (!domains.includes(domains)) {
+        domains.push(domain);
         chrome.storage.local.set({ aemDomains: domains }, () => {
           populateDropdown(domains);
-          console.log("Domain added:", normalizedDomain);
+          console.log("Domain added:", domain);
         });
       }
 
@@ -157,9 +158,11 @@ addDomainButton.addEventListener("click", () => {
     if (domain) {
       openPageProperties.disabled = false;
       openEditorMode.disabled = false;
+      editTemplateButton.disabled = false;
     } else {
       openPageProperties.disabled = true;
       openEditorMode.disabled = true;
+      editTemplateButton.disabled = true;
     }
   });
 
@@ -229,7 +232,6 @@ addDomainButton.addEventListener("click", () => {
       // Enable the Edit Template button if cq:template is available
       const templatePath = content["cq:template"];
       if (templatePath) {
-        editTemplateButton.disabled = false;
         editTemplateButton.addEventListener("click", () => {
           chrome.storage.local.get(["selectedDomain"], (result) => {
             const selectedDomain = result.selectedDomain?.replace(/\/$/, "");
@@ -823,5 +825,21 @@ const colorFormatRadio = document.getElementsByName("colorFormat");
       </div>
     `;
   }
+
+  // Fetch the manifest.json file
+  fetch('manifest.json')
+  .then(response => response.json())
+  .then(data => {
+    // Get the version from the manifest
+    const version = data.version;
+    
+    // Update the HTML element with the new version
+    const versionElement = document.getElementById('version');
+    versionElement.textContent = `v${version}`;
+  })
+  .catch(error => {
+    console.error('Error loading manifest:', error);
+  });
+
   
 });
