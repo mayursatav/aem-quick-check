@@ -45,6 +45,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const contentPathInput = document.getElementById("contentPathInput");
 
         if (!isAEMSite) {
+          pageDetailsDiv.style.display = "none"; 
           // Disable tab1 and show overlay if not an AEM site
           tab1.classList.add("disabled-tab");
           tab1.querySelectorAll("button, input").forEach((element) => {
@@ -54,11 +55,19 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           overlay.textContent = "This is not an AEM site.";
         } else if (!isAEMPath) {
           // If it's an AEM site but not a lower environment, show content path fields
-          openPageProperties.disabled = true;
-          openEditorMode.disabled = true;
-          domainInput.disabled = true;
-          domainDropdown.disabled = true;
-          addDomainButton.disabled = true;
+          // openPageProperties.disabled = true;
+          // openEditorMode.disabled = true;
+          // domainInput.disabled = true;
+          // domainDropdown.disabled = true;
+          // addDomainButton.disabled = true;
+          pageDetailsDiv.style.display = "none"; 
+          // Disable tab1 and show overlay if not an AEM site
+          tab1.classList.add("disabled-tab");
+          tab1.querySelectorAll("button, input").forEach((element) => {
+            element.disabled = true;
+          });
+          overlay.style.display = "block";
+          overlay.textContent = "This is not an AEM Author site.";
         }
       }
     }
