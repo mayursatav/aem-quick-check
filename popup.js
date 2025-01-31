@@ -28,8 +28,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         // Check if the page is an AEM site
         const isAEMSite = document.querySelector(".aem-Grid") !== null;
         const currentPath = window.location.pathname;
-        const isAEMPath = currentPath.startsWith("/content/");
-
+        const isAEMPath = currentPath.startsWith("/content/") || currentPath.startsWith("/editor.html/content/");
         // Return the results
         return { isAEMSite, isAEMPath };
       },
@@ -41,10 +40,9 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         // Get references to tab1, overlay, and content path fields
         const tab1 = document.querySelector("#tab1");
         const overlay = document.getElementById("overlay");
-        const contentPathLabel = document.querySelector("label[for='contentPathInput']");
-        const contentPathInput = document.getElementById("contentPathInput");
-
-        if (!isAEMSite) {
+        // const contentPathLabel = document.querySelector("label[for='contentPathInput']");
+        // const contentPathInput = document.getElementById("contentPathInput");
+        if (!isAEMSite & !isAEMPath) {
           pageDetailsDiv.style.display = "none"; 
           // Disable tab1 and show overlay if not an AEM site
           tab1.classList.add("disabled-tab");
@@ -52,7 +50,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             element.disabled = true;
           });
           overlay.style.display = "block";
-          overlay.textContent = "This is not an AEM site.";
+          overlay.textContent = "Not An AEM Author (wcmmode=disabled) / Publish Url. However, you can still use other available features.";
         } else if (!isAEMPath) {
           // If it's an AEM site but not a lower environment, show content path fields
           // openPageProperties.disabled = true;
@@ -67,7 +65,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             element.disabled = true;
           });
           overlay.style.display = "block";
-          overlay.textContent = "This is not an AEM Author site.";
+          overlay.textContent = "Not An AEM Author (wcmmode=disabled) / Publish Url. However, you can still use other available features.";
         }
       }
     }
@@ -193,7 +191,7 @@ addDomainButton.addEventListener("click", () => {
 
   // Fetch AEM Page JSON and display details
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const pageUrl = tabs[0].url;
+    const pageUrl = tabs[0].url.replace("/editor.html", "");
     const pageJsonUrl = pageUrl.replace(".html", ".1.json");
 
     fetch(pageJsonUrl)
@@ -280,7 +278,7 @@ openPageProperties.addEventListener("click", () => {
         return;
       }
 
-      const propertiesUrl = `${selectedDomain}/mnt/overlay/wcm/core/content/sites/properties.html?item=${currentPath.replace(/\.html$/, "")}`;
+      const propertiesUrl = `${selectedDomain}/mnt/overlay/wcm/core/content/sites/properties.html?item=${currentPath.replace(/\.html$/, "").replace("/editor.html", "")}`;
       chrome.tabs.create({ url: propertiesUrl });
     });
   });
@@ -302,7 +300,7 @@ openEditorMode.addEventListener("click", () => {
         return;
       }
 
-      const editorUrl = `${selectedDomain}/editor.html${currentPath}`;
+      const editorUrl = `${selectedDomain}/editor.html${currentPath.replace("/editor.html", "")}`;
       chrome.tabs.create({ url: editorUrl });
     });
   });
