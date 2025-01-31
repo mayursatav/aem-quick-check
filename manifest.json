@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AEM Quick Check",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": " AEM Quick Check Instantly access AEM Page data, debug tools, and SEO checks for faster workflows and team collaboration.",
   "permissions": ["storage", "scripting", "activeTab"],
   "icons": {
